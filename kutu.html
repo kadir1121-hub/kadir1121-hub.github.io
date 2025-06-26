@@ -3,18 +3,20 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Kutu Oyunu - Oynanabilir</title>
+<title>Kutu Oyunu | KadirGames</title>
 <style>
   body {
-    margin:0; padding:0;
+    margin: 0; padding: 0;
     font-family: Arial, sans-serif;
     background: linear-gradient(135deg,#3498db,#2980b9);
-    user-select:none;
+    user-select: none;
+    -webkit-user-select: none;
   }
   #gameArea {
     position: relative;
-    width: 400px; height: 400px;
-    margin: 60px auto 0;
+    width: 400px;
+    height: 400px;
+    margin: 60px auto;
     background: #1c5980;
     border-radius: 20px;
     border: 3px solid #14527a;
@@ -23,7 +25,8 @@
   }
   #player {
     position: absolute;
-    width: 50px; height: 50px;
+    width: 50px;
+    height: 50px;
     bottom: 0;
     left: 175px;
     background-image: url('https://i.imgur.com/Xe39pQW.png');
@@ -34,7 +37,8 @@
   #ground {
     position: absolute;
     bottom: 0;
-    width: 100%; height: 40px;
+    width: 100%;
+    height: 40px;
     background-color: #27ae60;
     border-radius: 0 0 20px 20px;
   }
@@ -42,7 +46,8 @@
     position: absolute;
     top: 150px;
     left: 170px;
-    width: 60px; height: 60px;
+    width: 60px;
+    height: 60px;
     background-color: #f1c40f;
     border-radius: 10px;
     box-shadow: 0 0 20px 5px rgba(241,196,15,0.7);
@@ -66,7 +71,8 @@
   }
   #backButton {
     position: absolute;
-    top: 15px; left: 15px;
+    top: 15px;
+    left: 15px;
     background: #c0392b;
     border: none;
     color: white;
@@ -205,4 +211,9 @@
   });
 
   actionBtn.addEventListener('click', jumpOrHit);
-  backBtn.addEventListener
+  backBtn.addEventListener('click', resetGame);
+  playBtn.addEventListener('click', startGame);
+</script>
+
+</body>
+</html>
