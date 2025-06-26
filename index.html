@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>KadirGames - Oyun Portalı</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0; padding: 0;
+  }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: #facc15;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background-color: #111827;
+    padding: 1.5rem;
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    user-select: none;
+  }
+  main {
+    flex-grow: 1;
+    max-width: 600px;
+    margin: 2rem auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    padding: 0 1rem;
+  }
+  .game-card {
+    background: #1e293b;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.7);
+    padding: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .game-card:hover {
+    background-color: #2563eb;
+  }
+  .game-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+  .play-button {
+    background-color: #facc15;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-size: 1.2rem;
+    color: #111827;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  .play-button:hover {
+    background-color: #d4b619;
+  }
+
+  /* Modal styles */
+  #modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  #modal.hidden {
+    display: none;
+  }
+  #modal-content {
+    background: #1e293b;
+    padding: 2rem;
+    border-radius: 14px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    color: #facc15;
+  }
+  #modal-content h2 {
+    margin-bottom: 1rem;
+  }
+  #username-input {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    border: none;
+    margin-bottom: 1rem;
+    outline: none;
+  }
+  #username-input:focus {
+    box-shadow: 0 0 5px #fbbf24;
+  }
+  #start-btn {
+    background-color: #facc15;
+    border: none;
+    padding: 0.9rem 1.5rem;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    color: #111827;
+    cursor: pointer;
+    width: 100%;
+  }
+  #start-btn:hover {
+    background-color: #d4b619;
+  }
+  #error-msg {
+    margin-top: 0.75rem;
+    color: #f87171;
+    min-height: 1.2rem;
+  }
+</style>
+</head>
+<body>
+
+<header>KadirGames</header>
+
+<main>
+  <section class="game-card" data-game="yilan">
+    <div class="game-title">🐍 Yılan Oyunu</div>
+    <button class="play-button">Oyna</button>
+  </section>
+
+  <section class="game-card" data-game="renkkoru">
+    <div class="game-title">🎨 Renk Körü</div>
+    <button class="play-button">Oyna</button>
+  </section>
+</main>
+
+<!-- İsim Modal -->
+<div id="modal">
+  <div id="modal-content">
+    <h2>Hoşgeldin!</h2>
+    <p>Lütfen ismini gir:</p>
+    <input type="text" id="username-input" placeholder="En az 3 karakter" />
+    <button id="start-btn">Başla</button>
+    <div id="error-msg"></div>
+  </div>
+</div>
+
+<script>
+  const modal = document.getElementById('modal');
+  const usernameInput = document.getElementById('username-input');
+  const startBtn = document.getElementById('start-btn');
+  const errorMsg = document.getElementById('error-msg');
+
+  const USER_KEY = 'kadirgames_username';
+
+  // localStorage'da zaten isim varsa modal kapansın
+  function validateName(name) {
+    return /^[a-zA-Z0-9ğüşöçıİĞÜŞÖÇ]{3,15}$/.test(name);
+  }
+
+  function hideModal() {
+    modal.classList.add('hidden');
+  }
+
+  function showModal() {
+    modal.classList.remove('hidden');
+  }
+
+  function loadUsername() {
+    return localStorage.getItem(USER_KEY);
+  }
+
+  function saveUsername(name) {
+    localStorage.setItem(USER_KEY, name);
+  }
+
+  function init() {
+    const storedName = loadUsername();
+    if(storedName && validateName(storedName)) {
+      hideModal();
+    } else {
+      showModal();
+    }
+  }
+
+  startBtn.addEventListener('click', () => {
+    const name = usernameInput.value.trim();
+    if(!validateName(name)) {
+      errorMsg.textContent = 'Geçerli bir isim gir (3-15 harf veya rakam)';
+      return;
+    }
+    saveUsername(name);
+    hideModal();
+  });
+
+  // Oyun butonları tıklanınca isim kontrolü, sonra yönlendirme
+  document.querySelectorAll('.play-button').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const username = loadUsername();
+      if(!username) {
+        showModal();
+        return;
+      }
+      const gameCard = e.target.closest('.game-card');
+      const game = gameCard.getAttribute('data-game');
+      if(game === 'yilan') {
+        window.location.href = 'yilan.html';
+      } else if(game === 'renkkoru') {
+        window.location.href = 'renkkoru.html';
+      }
+    });
+  });
+
+  window.onload = init;
+</script>
+
+</body>
+</html>
