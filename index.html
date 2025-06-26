@@ -28,57 +28,43 @@
   }
   main {
     flex-grow: 1;
-    max-width: 1200px;
+    max-width: 600px;
     margin: 2rem auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
-    gap: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
     padding: 0 1rem;
   }
   .game-card {
     background: #1e293b;
     border-radius: 12px;
     box-shadow: 0 8px 24px rgb(0 0 0 / 0.7);
-    overflow: hidden;
+    padding: 2rem;
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
     cursor: pointer;
-    transition: transform 0.25s ease;
+    transition: background-color 0.3s ease;
   }
   .game-card:hover {
-    transform: scale(1.05);
+    background-color: #2563eb;
   }
-  .game-card img {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-    background-color: #111827;
-  }
-  .game-info {
-    padding: 1.25rem;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-  .game-info h2 {
-    color: #fbbf24;
-    font-size: 1.6rem;
-    margin-bottom: 1rem;
+  .game-title {
+    font-size: 1.8rem;
+    font-weight: 700;
   }
   .play-button {
-    background-color: #2563eb;
+    background-color: #facc15;
     border: none;
     padding: 0.8rem 1.5rem;
-    font-size: 1.15rem;
-    color: white;
+    font-size: 1.2rem;
+    color: #111827;
     border-radius: 8px;
     cursor: pointer;
-    align-self: center;
     transition: background-color 0.2s ease;
   }
   .play-button:hover {
-    background-color: #1d4ed8;
+    background-color: #d4b619;
   }
 
   /* Modal styles */
@@ -119,17 +105,17 @@
     box-shadow: 0 0 5px #fbbf24;
   }
   #start-btn {
-    background-color: #2563eb;
+    background-color: #facc15;
     border: none;
     padding: 0.9rem 1.5rem;
     font-size: 1.1rem;
     border-radius: 8px;
-    color: white;
+    color: #111827;
     cursor: pointer;
     width: 100%;
   }
   #start-btn:hover {
-    background-color: #1d4ed8;
+    background-color: #d4b619;
   }
   #error-msg {
     margin-top: 0.75rem;
@@ -144,19 +130,13 @@
 
 <main>
   <section class="game-card" data-game="yilan">
-    <img src="https://i.imgur.com/TlzRK3U.png" alt="Yılan Oyunu">
-    <div class="game-info">
-      <h2>🐍 Yılan Oyunu</h2>
-      <button class="play-button">Oyna</button>
-    </div>
+    <div class="game-title">🐍 Yılan Oyunu</div>
+    <button class="play-button">Oyna</button>
   </section>
 
   <section class="game-card" data-game="renkkoru">
-    <img src="https://i.imgur.com/2ny8Bv8.png" alt="Renk Körü Oyunu">
-    <div class="game-info">
-      <h2>🎨 Renk Körü</h2>
-      <button class="play-button">Oyna</button>
-    </div>
+    <div class="game-title">🎨 Renk Körü</div>
+    <button class="play-button">Oyna</button>
   </section>
 </main>
 
@@ -179,6 +159,7 @@
 
   const USER_KEY = 'kadirgames_username';
 
+  // localStorage'da zaten isim varsa modal kapansın
   function validateName(name) {
     return /^[a-zA-Z0-9ğüşöçıİĞÜŞÖÇ]{3,15}$/.test(name);
   }
@@ -218,6 +199,7 @@
     hideModal();
   });
 
+  // Oyun butonları tıklanınca isim kontrolü, sonra yönlendirme
   document.querySelectorAll('.play-button').forEach(btn => {
     btn.addEventListener('click', e => {
       const username = loadUsername();
