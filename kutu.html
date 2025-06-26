@@ -3,18 +3,17 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Kutu Oyunu</title>
+<title>Kutu Oyunu - Oynanabilir</title>
 <style>
   body {
-    margin: 0; padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    user-select: none;
+    margin:0; padding:0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg,#3498db,#2980b9);
+    user-select:none;
   }
   #gameArea {
     position: relative;
-    width: 400px;
-    height: 400px;
+    width: 400px; height: 400px;
     margin: 60px auto 0;
     background: #1c5980;
     border-radius: 20px;
@@ -24,8 +23,7 @@
   }
   #player {
     position: absolute;
-    width: 50px;
-    height: 50px;
+    width: 50px; height: 50px;
     bottom: 0;
     left: 175px;
     background-image: url('https://i.imgur.com/Xe39pQW.png');
@@ -36,8 +34,7 @@
   #ground {
     position: absolute;
     bottom: 0;
-    width: 100%;
-    height: 40px;
+    width: 100%; height: 40px;
     background-color: #27ae60;
     border-radius: 0 0 20px 20px;
   }
@@ -45,15 +42,14 @@
     position: absolute;
     top: 150px;
     left: 170px;
-    width: 60px;
-    height: 60px;
+    width: 60px; height: 60px;
     background-color: #f1c40f;
     border-radius: 10px;
-    box-shadow: 0 0 20px 5px rgba(241, 196, 15, 0.7);
+    box-shadow: 0 0 20px 5px rgba(241,196,15,0.7);
     transition: box-shadow 0.3s ease;
   }
   #block.glow {
-    box-shadow: 0 0 40px 15px rgba(241, 196, 15, 1);
+    box-shadow: 0 0 40px 15px rgba(241,196,15,1);
   }
   #playButton {
     display: block;
@@ -70,8 +66,7 @@
   }
   #backButton {
     position: absolute;
-    top: 15px;
-    left: 15px;
+    top: 15px; left: 15px;
     background: #c0392b;
     border: none;
     color: white;
@@ -80,6 +75,23 @@
     border-radius: 10px;
     cursor: pointer;
     box-shadow: 0 0 10px #a93226;
+    user-select: none;
+    display: none;
+    z-index: 1000;
+  }
+  #actionButton {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 18px 40px;
+    font-size: 1.8rem;
+    border-radius: 12px;
+    border: none;
+    background-color: #27ae60;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 0 15px #1e8449;
     user-select: none;
     display: none;
     z-index: 1000;
@@ -95,17 +107,19 @@
   <div id="player"></div>
   <div id="ground"></div>
   <div id="block"></div>
+  <button id="actionButton">Zıpla / Vur</button>
 </div>
 
 <script>
   const playBtn = document.getElementById('playButton');
   const gameArea = document.getElementById('gameArea');
   const backBtn = document.getElementById('backButton');
+  const actionBtn = document.getElementById('actionButton');
   const player = document.getElementById('player');
   const block = document.getElementById('block');
 
-  let posY = 0; // Oyuncu yerden yüksekliği (0 = yerde)
-  let velocityY = 0; // Düşey hız
+  let posY = 0;
+  let velocityY = 0;
   const gravity = 1.3;
   const jumpPower = 22;
   let onGround = true;
@@ -129,7 +143,6 @@
     if(gameRunning) requestAnimationFrame(gameLoop);
   }
 
-  // Blok parlama animasyonu başlat
   function startGlow() {
     if(glowing) return;
     glowing = true;
@@ -140,7 +153,6 @@
     }, 700);
   }
 
-  // Bloka vurma fonksiyonu
   function hitBlock() {
     if(!gameRunning) return;
     startGlow();
@@ -151,11 +163,21 @@
     }
   }
 
-  // Oyunu başlat
+  function jumpOrHit() {
+    if(!gameRunning) return;
+    if(onGround) {
+      velocityY = -jumpPower;
+      onGround = false;
+    } else {
+      hitBlock();
+    }
+  }
+
   function startGame() {
     playBtn.style.display = 'none';
     gameArea.style.display = 'block';
     backBtn.style.display = 'block';
+    actionBtn.style.display = 'block';
     posY = 0;
     velocityY = 0;
     onGround = true;
@@ -165,34 +187,22 @@
     requestAnimationFrame(gameLoop);
   }
 
-  // Oyunu sıfırla / Menüye dön
   function resetGame() {
     playBtn.style.display = 'block';
     gameArea.style.display = 'none';
     backBtn.style.display = 'none';
+    actionBtn.style.display = 'none';
     gameRunning = false;
     clearTimeout(glowTimeout);
     block.classList.remove('glow');
   }
 
-  // Klavye kontrolü
   document.addEventListener('keydown', (e) => {
     if(!gameRunning) return;
-
     if(e.code === 'Space' || e.key === ' ') {
-      if(onGround) {
-        velocityY = -jumpPower;
-        onGround = false;
-      } else {
-        hitBlock();
-      }
+      jumpOrHit();
     }
   });
 
-  // Geri butonu tıklanma olayı
-  backBtn.addEventListener('click', resetGame);
-  playBtn.addEventListener('click', startGame);
-</script>
-
-</body>
-</html>
+  actionBtn.addEventListener('click', jumpOrHit);
+  backBtn.addEventListener
