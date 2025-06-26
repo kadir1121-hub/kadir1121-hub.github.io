@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KadirGames - Oyun Portalı</title>
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg,#111827,#1e293b);
+    color: #eee;
+    min-height:100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: #0f172a;
+    padding:20px;
+    text-align:center;
+    font-size:2.4rem;
+    font-weight:700;
+    letter-spacing:2px;
+  }
+  #games {
+    flex:1;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:24px;
+    padding:40px;
+    max-width:1200px;
+    margin:0 auto;
+  }
+  .game {
+    background:#1e293b;
+    border-radius:12px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.5);
+    overflow:hidden;
+    cursor:pointer;
+    transition:transform .25s;
+  }
+  .game:hover {
+    transform:scale(1.04);
+  }
+  .game img {
+    width:100%;
+    height:160px;
+    object-fit:cover;
+    background:#000;
+  }
+  .game h3 {
+    padding:16px;
+    font-size:1.6rem;
+    text-align:center;
+    color:#facc15;
+  }
+  .game button {
+    display:block;
+    margin:0 auto 20px;
+    padding:10px 24px;
+    font-size:1.2rem;
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    transition:background .2s;
+  }
+  .game button:hover {
+    background:#1d4ed8;
+  }
+  /* Modal */
+  #modal {
+    position:fixed;top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,.85);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:999;
+  }
+  #modalContent {
+    background:#1e293b;
+    padding:28px;
+    border-radius:12px;
+    text-align:center;
+    width:90%;max-width:360px;
+  }
+  #modalContent h2 {
+    margin-bottom:16px;
+    color:#facc15;
+  }
+  #modalContent input {
+    width:100%;
+    padding:12px;
+    margin-bottom:16px;
+    font-size:1.2rem;
+    border:none;
+    border-radius:8px;
+  }
+  #modalContent button {
+    padding:12px 28px;
+    font-size:1.2rem;
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+  }
+  #modalContent .error {
+    margin-top:12px;
+    color:#f87171;
+    min-height:1.2em;
+  }
+  @media(min-width:600px) {
+    #games { padding:60px; }
+    .game img { height:200px; }
+  }
+</style>
+</head>
+<body>
+
+<header>KadirGames</header>
+
+<div id="games">
+  <div class="game" data-game="yilan">
+    <img src="https://i.imgur.com/TlzRK3U.png" alt="Yılan Oyunu">
+    <h3>🐍 Yılan Oyunu</h3>
+    <button>Oyna</button>
+  </div>
+  <div class="game" data-game="renkkoru">
+    <img src="https://i.imgur.com/2ny8Bv8.png" alt="Renk Körü Oyunu">
+    <h3>🎨 Renk Körü</h3>
+    <button>Oyna</button>
+  </div>
+</div>
+
+<div id="modal">
+  <div id="modalContent">
+    <h2>Hoşgeldin!</h2>
+    <p>İsminizi girin:</p>
+    <input id="username" placeholder="En az 3 karakter">
+    <button id="startBtn">Devam</button>
+    <div class="error" id="errMsg"></div>
+  </div>
+</div>
+
+<script>
+  const GAMES = {
+    yilan:'yilan.html',
+    renkkoru:'renkkoru.html'
+  };
+  const USER_KEY = 'kg_username';
+  const username = localStorage.getItem(USER_KEY);
+  const modal = document.getElementById('modal');
+  const usernameInput = document.getElementById('username');
+  const errMsg = document.getElementById('errMsg');
+  const startBtn = document.getElementById('startBtn');
+
+  function validName(n) {
+    return /^[a-zA-Z0-9ğüşöçıİĞÜŞÖÇ]{3,15}$/.test(n);
+  }
+
+  function init() {
+    if(username) modal.style.display='none';
+  }
+
+  startBtn.onclick = () => {
+    const v = usernameInput.value.trim();
+    if(!validName(v)) {
+      errMsg.textContent = 'Geçerli isim gir (3-15 harf/rakam)';
+      return;
+    }
+    localStorage.setItem(USER_KEY,v);
+    modal.style.display='none';
+  };
+
+  document.querySelectorAll('.game button').forEach(b => {
+    b.onclick = e => {
+      const u = localStorage.getItem(USER_KEY);
+      if(!u) {
+        modal.style.display='flex';
+      } else {
+        const game = e.currentTarget.closest('.game').dataset.game;
+        window.location.href = GAMES[game];
+      }
+    };
+  });
+
+  window.onload = init;
+</script>
+
+</body>
+</html>
