@@ -1,80 +1,93 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-<title>🚗 PixelCar 🚗</title>
-<style>
-  /* Temel stil ayarları */
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    margin: 0;
-    background-color: #323232;
-    color: white;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    user-select: none;
-    overflow: hidden;
-    text-align: center;
-  }
-  #title {
-    font-size: 40px;
-    font-weight: bold;
-    padding: 15px 0;
-    user-select: none;
-  }
-  #gameCanvas {
-    background-color: #323232;
-    border: 3px solid #555;
-    display: block;
-    margin: 0 auto 10px auto;
-    touch-action: none;
-  }
-  #controls {
-    position: fixed;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 280px;
-    height: 100px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    user-select: none;
-    z-index: 10;
-  }
-  .btn {
-    background-color: #555;
-    border-radius: 12px;
-    width: 65px;
-    height: 65px;
-    color: white;
-    font-size: 42px;
-    line-height: 65px;
-    text-align: center;
-    user-select: none;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: background-color 0.15s ease;
-  }
-  .btn:active {
-    background-color: #999;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>CarPixel Sitesi</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #111;
+      color: #eee;
+      font-family: Arial, sans-serif;
+      user-select: none;
+      overflow-x: hidden;
+    }
+    header, footer {
+      background: #222;
+      padding: 15px;
+      text-align: center;
+    }
+    main {
+      padding: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    h1, h2 {
+      margin: 0 0 15px;
+    }
+    #pixelcar-game-section {
+      margin-top: 40px;
+    }
+    /* Oyun canvas ve tuşlar */
+    #gameCanvas {
+      background: #323232;
+      border: 2px solid #555;
+      display: block;
+      margin: 10px auto;
+      max-width: 100%;
+      height: auto;
+    }
+    #controls {
+      width: 280px;
+      margin: 0 auto 30px auto;
+      display: flex;
+      justify-content: space-around;
+      user-select: none;
+    }
+    .btn {
+      background-color: #555;
+      border-radius: 12px;
+      width: 65px;
+      height: 65px;
+      color: white;
+      font-size: 42px;
+      line-height: 65px;
+      text-align: center;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background-color 0.15s ease;
+      user-select: none;
+    }
+    .btn:active {
+      background-color: #999;
+    }
+  </style>
 </head>
 <body>
 
-<div id="title">🚗 PixelCar 🚗</div>
+<header>
+  <h1>CarPixel Sitesi</h1>
+</header>
 
-<canvas id="gameCanvas" width="800" height="600"></canvas>
+<main>
+  <p>Burada sitenin diğer içerikleri olabilir...</p>
 
-<div id="controls">
-  <div id="leftBtn" class="btn">◀</div>
-  <div id="upBtn" class="btn">▲</div>
-  <div id="downBtn" class="btn">▼</div>
-  <div id="rightBtn" class="btn">▶</div>
-</div>
+  <section id="pixelcar-game-section">
+    <h2>🚗 PixelCar Oyunu 🚗</h2>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div id="controls">
+      <div id="leftBtn" class="btn">◀</div>
+      <div id="upBtn" class="btn">▲</div>
+      <div id="downBtn" class="btn">▼</div>
+      <div id="rightBtn" class="btn">▶</div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  © 2025 CarPixel Tüm hakları saklıdır.
+</footer>
 
 <script>
 (() => {
@@ -84,20 +97,17 @@
   const WIDTH = canvas.width;
   const HEIGHT = canvas.height;
 
-  // Renkler
   const GRAY = 'rgb(50,50,50)';
   const YELLOW = 'rgb(255,255,0)';
   const RED = 'rgb(200,0,0)';
   const BLUE = 'rgb(0,0,255)';
 
-  // Oyuncu arabası
   const carWidth = 40;
   const carHeight = 70;
   let carX = WIDTH / 2 - carWidth / 2;
   let carY = HEIGHT - carHeight - 20;
   const carSpeed = 5;
 
-  // Düşman arabalar
   const enemyWidth = 40;
   const enemyHeight = 70;
   const enemySpeed = 5;
@@ -110,37 +120,31 @@
     return { x, y, width: enemyWidth, height: enemyHeight };
   }
 
-  for (let i = 0; i < enemyCount; i++) {
+  for(let i=0; i<enemyCount; i++){
     enemyCars.push(createEnemy());
   }
 
-  // Tuş durumu
-  const keys = {
-    left: false,
-    right: false,
-    up: false,
-    down: false,
-  };
+  const keys = { left:false, right:false, up:false, down:false };
 
-  // Dokunmatik butonlar
+  // Mobil tuşlar için
   const leftBtn = document.getElementById('leftBtn');
   const rightBtn = document.getElementById('rightBtn');
   const upBtn = document.getElementById('upBtn');
   const downBtn = document.getElementById('downBtn');
 
-  function addTouchListeners(btn, keyName) {
+  function addTouchListeners(btn, keyName){
     btn.addEventListener('touchstart', e => {
       e.preventDefault();
       keys[keyName] = true;
-    }, { passive: false });
+    }, {passive:false});
     btn.addEventListener('touchend', e => {
       e.preventDefault();
       keys[keyName] = false;
-    }, { passive: false });
+    }, {passive:false});
     btn.addEventListener('touchcancel', e => {
       e.preventDefault();
       keys[keyName] = false;
-    }, { passive: false });
+    }, {passive:false});
   }
 
   addTouchListeners(leftBtn, 'left');
@@ -148,98 +152,83 @@
   addTouchListeners(upBtn, 'up');
   addTouchListeners(downBtn, 'down');
 
-  // Klavye dinleyicileri
+  // Klavye ok tuşları için
   window.addEventListener('keydown', e => {
-    switch (e.key) {
-      case 'ArrowLeft': keys.left = true; break;
-      case 'ArrowRight': keys.right = true; break;
-      case 'ArrowUp': keys.up = true; break;
-      case 'ArrowDown': keys.down = true; break;
-    }
+    if(e.key === 'ArrowLeft') keys.left = true;
+    if(e.key === 'ArrowRight') keys.right = true;
+    if(e.key === 'ArrowUp') keys.up = true;
+    if(e.key === 'ArrowDown') keys.down = true;
   });
+
   window.addEventListener('keyup', e => {
-    switch (e.key) {
-      case 'ArrowLeft': keys.left = false; break;
-      case 'ArrowRight': keys.right = false; break;
-      case 'ArrowUp': keys.up = false; break;
-      case 'ArrowDown': keys.down = false; break;
-    }
+    if(e.key === 'ArrowLeft') keys.left = false;
+    if(e.key === 'ArrowRight') keys.right = false;
+    if(e.key === 'ArrowUp') keys.up = false;
+    if(e.key === 'ArrowDown') keys.down = false;
   });
 
-  // Yol çizgisi çizimi
-  function drawRoad() {
+  function drawRoad(){
     ctx.fillStyle = GRAY;
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.fillRect(0,0, WIDTH, HEIGHT);
     ctx.fillStyle = YELLOW;
-    for (let i = 0; i < HEIGHT; i += 40) {
-      ctx.fillRect(WIDTH / 2 - 5, i, 10, 20);
+    for(let i=0; i<HEIGHT; i+=40){
+      ctx.fillRect(WIDTH/2 - 5, i, 10, 20);
     }
   }
 
-  // Araba çizimi
-  function drawCar(x, y) {
+  function drawCar(x,y){
     ctx.fillStyle = RED;
-    ctx.fillRect(x, y, carWidth, carHeight);
+    ctx.fillRect(x,y, carWidth, carHeight);
   }
 
-  // Düşman arabaları çizimi
-  function drawEnemies() {
+  function drawEnemies(){
     ctx.fillStyle = BLUE;
     enemyCars.forEach(enemy => {
       ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
     });
   }
 
-  // Düşmanları hareket ettir
-  function moveEnemies() {
+  function moveEnemies(){
     enemyCars.forEach(enemy => {
       enemy.y += enemySpeed;
-      if (enemy.y > HEIGHT) {
+      if(enemy.y > HEIGHT){
         enemy.x = Math.floor(Math.random() * (WIDTH - 200)) + 100;
         enemy.y = Math.floor(Math.random() * -600) - enemyHeight;
       }
     });
   }
 
-  // Çarpışma kontrolü
-  function checkCollision(rect1, rect2) {
+  function checkCollision(r1,r2){
     return !(
-      rect1.x > rect2.x + rect2.width ||
-      rect1.x + rect1.width < rect2.x ||
-      rect1.y > rect2.y + rect2.height ||
-      rect1.y + rect1.height < rect2.y
+      r1.x > r2.x + r2.width ||
+      r1.x + r1.width < r2.x ||
+      r1.y > r2.y + r2.height ||
+      r1.y + r1.height < r2.y
     );
   }
 
-  function checkAnyCollision(playerRect) {
-    for (let enemy of enemyCars) {
-      if (checkCollision(playerRect, enemy)) {
-        return true;
-      }
+  function checkAnyCollision(playerRect){
+    for(let enemy of enemyCars){
+      if(checkCollision(playerRect, enemy)) return true;
     }
     return false;
   }
 
-  // Oyun döngüsü
-  function gameLoop() {
-    // Araba hareketi
-    if (keys.left && carX > 0) carX -= carSpeed;
-    if (keys.right && carX < WIDTH - carWidth) carX += carSpeed;
-    if (keys.up && carY > 0) carY -= carSpeed;
-    if (keys.down && carY < HEIGHT - carHeight) carY += carSpeed;
+  function gameLoop(){
+    if(keys.left && carX > 0) carX -= carSpeed;
+    if(keys.right && carX < WIDTH - carWidth) carX += carSpeed;
+    if(keys.up && carY > 0) carY -= carSpeed;
+    if(keys.down && carY < HEIGHT - carHeight) carY += carSpeed;
 
-    // Düşman hareketi
     moveEnemies();
 
-    // Çarpışma kontrolü
-    const playerRect = { x: carX, y: carY, width: carWidth, height: carHeight };
-    if (checkAnyCollision(playerRect)) {
-      alert('💥 Çarpışma! Oyun Bitti.');
+    const playerRect = {x: carX, y: carY, width: carWidth, height: carHeight};
+    if(checkAnyCollision(playerRect)){
+      alert("💥 Çarpışma! Oyun Bitti.");
       window.location.reload();
       return;
     }
 
-    // Çizim
     drawRoad();
     drawCar(carX, carY);
     drawEnemies();
