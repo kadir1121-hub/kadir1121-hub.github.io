@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<title>Kuş Bakışı Pixel Araba Oyunu</title>
+<style>
+  body {
+    margin: 0; 
+    overflow: hidden;
+    background: #323232;
+    font-family: sans-serif;
+    -webkit-touch-callout: none; 
+    -webkit-user-select: none; 
+    -moz-user-select: none; 
+    -ms-user-select: none; 
+    user-select: none;
+  }
+  #gameCanvas {
+    display: block;
+    margin: 0 auto;
+    background: #323232;
+    touch-action: none;
+  }
+  #controls {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 260px;
+    height: 100px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    user-select: none;
+  }
+  .btn {
+    background: #555;
+    border-radius: 10px;
+    width: 60px;
+    height: 60px;
+    color: white;
+    font-size: 40px;
+    line-height: 60px;
+    text-align: center;
+    user-select: none;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active {
+    background: #999;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="gameCanvas" width="800" height="600"></canvas>
+
+<div id="controls">
+  <div id="leftBtn" class="btn">◀</div>
+  <div id="upBtn" class="btn">▲</div>
+  <div id="downBtn" class="btn">▼</div>
+  <div id="rightBtn" class="btn">▶</div>
+</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
+
+  const WIDTH = canvas.width;
+  const HEIGHT = canvas.height;
+
+  // Renkler
+  const WHITE = "rgb(255,255,255)";
+  const GRAY = "rgb(50,50,50)";
+  const YELLOW = "rgb(255,255,0)";
+  const RED = "rgb(200,0,0)";
+  const BLUE = "rgb(0,0,255)";
+
+  // Oyuncu arabası
+  const carWidth = 40;
+  const carHeight = 70;
+  let carX = WIDTH / 2 - carWidth / 2;
+  let carY = HEIGHT - carHeight - 20;
+  const carSpeed = 5;
+
+  // Düşman arabalar
+  const enemyWidth = 40;
+  const enemyHeight = 70;
+  const enemySpeed = 5;
+  const enemyCount = 5;
+  const enemyCars = [];
+
+  function createEnemy() {
+    const x = Math.floor(Math.random() * (WIDTH - 200)) + 100;
+    const y = Math.floor(Math.random() * -500) - enemyHeight;
+    return {x, y, width: enemyWidth, height: enemyHeight};
+  }
+
+  for (let i = 0; i < enemyCount; i++) {
+    enemyCars.push(createEnemy());
+  }
+
+  // Tuş durumu
+  const keys = {
+    left: false,
+    right: false,
+    up: false,
+    down: false
+  };
+
+  // Dokunmatik kontroller
+  const leftBtn = document.getElementById("leftBtn");
+  const rightBtn = document.getElementById("rightBtn");
+  const upBtn = document.getElementById("upBtn");
+  const downBtn = document.getElementById("downBtn");
+
+  function addTouchListeners(btn, keyName) {
+    btn.addEventListener("touchstart", e => {
+      e.preventDefault();
+      keys[keyName] = true;
+    }, {passive:false});
+    btn.addEventListener("touchend", e => {
+      e.preventDefault();
+      keys[keyName] = false;
+    }, {passive:false});
+    btn.addEventListener("touchcancel", e => {
+      e.preventDefault();
+      keys[keyName] = false;
+    }, {passive:false});
+  }
+
+  addTouchListeners(leftBtn, "left");
+  addTouchListeners(rightBtn, "right");
+  addTouchListeners(upBtn, "up");
+  addTouchListeners(downBtn, "down");
+
+  // Klavye dinleyiciler
+  window.addEventListener("keydown", e => {
+    switch(e.key) {
+      case "ArrowLeft": keys.left = true; break;
+      case "ArrowRight": keys.right = true; break;
+      case "ArrowUp": keys.up = true; break;
+      case "ArrowDown": keys.down = true; break;
+    }
+  });
+  window.addEventListener("keyup", e => {
+    switch(e.key) {
+      case "ArrowLeft": keys.left = false; break;
+      case "ArrowRight": keys.right = false; break;
+      case "ArrowUp": keys.up = false; break;
+      case "ArrowDown": keys.down = false; break;
+    }
+  });
+
+  // Yol çizgisi çizimi
+  function drawRoad() {
+    ctx.fillStyle = GRAY;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.fillStyle = YELLOW;
+    for (let i = 0; i < HEIGHT; i += 40) {
+      ctx.fillRect(WIDTH / 2 - 5, i, 10, 20);
+    }
+  }
+
+  // Araba çizimi
+  function drawCar(x, y) {
+    ctx.fillStyle = RED;
+    ctx.fillRect(x, y, carWidth, carHeight);
+  }
+
+  // Düşman arabaları çizimi
+  function drawEnemies() {
+    ctx.fillStyle = BLUE;
+    enemyCars.forEach(enemy => {
+      ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+    });
+  }
+
+  // Düşmanları hareket ettir
+  function moveEnemies() {
+    enemyCars.forEach(enemy => {
+      enemy.y += enemySpeed;
+      if (enemy.y > HEIGHT) {
+        enemy.x = Math.floor(Math.random() * (WIDTH - 200)) + 100;
+        enemy.y = Math.floor(Math.random() * -500) - enemyHeight;
+      }
+    });
+  }
+
+  // Çarpışma kontrolü
+  function checkCollision(rect1, rect2) {
+    return !(rect1.x > rect2.x + rect2.width ||
+             rect1.x + rect1.width < rect2.x ||
+             rect1.y > rect2.y + rect2.height ||
+             rect1.y + rect1.height < rect2.y);
+  }
+
+  function checkAnyCollision(playerRect) {
+    for (let enemy of enemyCars) {
+      if (checkCollision(playerRect, enemy)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Oyun döngüsü
+  function gameLoop() {
+    // Araba hareketi
+    if (keys.left && carX > 0) carX -= carSpeed;
+    if (keys.right && carX < WIDTH - carWidth) carX += carSpeed;
+    if (keys.up && carY > 0) carY -= carSpeed;
+    if (keys.down && carY < HEIGHT - carHeight) carY += carSpeed;
+
+    // Düşman hareketi
+    moveEnemies();
+
+    // Çarpışma kontrolü
+    const playerRect = {x: carX, y: carY, width: carWidth, height: carHeight};
+    if (checkAnyCollision(playerRect)) {
+      alert("💥 Çarpışma! Oyun Bitti.");
+      window.location.reload(); // Sayfayı yenile
+      return;
+    }
+
+    // Çizim
+    drawRoad();
+    drawCar(carX, carY);
+    drawEnemies();
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  gameLoop();
+
+})();
+</script>
+
+</body>
+</html>
