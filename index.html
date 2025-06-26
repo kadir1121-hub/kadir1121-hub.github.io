@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>KadirGames</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #1e3c72, #2a5298);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    h1 {
+      font-size: 3em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 5px black;
+    }
+    .games {
+      display: flex;
+      gap: 40px;
+      margin-top: 20px;
+    }
+    .game {
+      background: white;
+      color: black;
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .game:hover {
+      transform: scale(1.07);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+    }
+    .game img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    #nameModal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    #nameBox {
+      background: white;
+      color: black;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(255,255,255,0.3);
+    }
+    input[type="text"] {
+      padding: 10px;
+      width: 200px;
+      font-size: 16px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background-color: #1e90ff;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1565c0;
+    }
+    audio {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <audio autoplay loop>
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/14/audio_0599c2cc4c.mp3?filename=soft-electronic-ambient-116100.mp3" type="audio/mp3">
+  </audio>
+
+  <div id="nameModal">
+    <div id="nameBox">
+      <h2>İsmini gir:</h2>
+      <input type="text" id="playerName" placeholder="Adın">
+      <br>
+      <button onclick="saveName()">Başla</button>
+    </div>
+  </div>
+
+  <h1>KadirGames</h1>
+  <div class="games">
+    <div class="game" onclick="go('yilan.html')">
+      <img src="https://cdn-icons-png.flaticon.com/512/828/828325.png" alt="Yılan">
+      <p>Yılan Oyunu</p>
+    </div>
+    <div class="game" onclick="go('renkkoru.html')">
+      <img src="https://cdn-icons-png.flaticon.com/512/983/983149.png" alt="Renk Körü">
+      <p>RenkKörü</p>
+    </div>
+  </div>
+
+  <script>
+    function saveName() {
+      const name = document.getElementById("playerName").value.trim();
+      if (name.length > 0) {
+        localStorage.setItem("playerName", name);
+        document.getElementById("nameModal").style.display = "none";
+      }
+    }
+
+    function go(page) {
+      const name = localStorage.getItem("playerName");
+      if (!name) {
+        alert("Lütfen önce ismini gir!");
+        return;
+      }
+      window.location.href = page;
+    }
+
+    window.onload = () => {
+      if (localStorage.getItem("playerName")) {
+        document.getElementById("nameModal").style.display = "none";
+      }
+    }
+  </script>
+</body>
+</html>
