@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Kutu Oyunu - kadirgames</title>
+  <style>
+    body {
+      margin: 0; background: #111; color: white; font-family: sans-serif; text-align: center;
+    }
+    canvas {
+      background: #333;
+      margin-top: 20px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .controls { margin-top: 20px; display: none; }
+    .btn {
+      background: #4caf50; color: white; font-size: 20px; padding: 10px 20px;
+      border: none; border-radius: 8px; margin: 5px;
+    }
+    .platform-sec {
+      margin-top: 20px;
+    }
+    .platform-btn {
+      background: orange; color: black; font-size: 18px; padding: 10px 20px;
+      margin: 10px; border: none; border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🧱 Zeminde Kal</h1>
+
+  <div class="platform-sec" id="secim">
+    <p>Ne ile oynuyorsun?</p>
+    <button class="platform-btn" onclick="baslat('pc')">💻 Bilgisayar</button>
+    <button class="platform-btn" onclick="baslat('mobil')">📱 Telefon</button>
+  </div>
+
+  <canvas id="game" width="400" height="400"></canvas>
+
+  <div class="controls" id="kontroller">
+    <button class="btn" onclick="yon('up')">⬆️</button><br>
+    <button class="btn" onclick="yon('left')">⬅️</button>
+    <button class="btn" onclick="yon('down')">⬇️</button>
+    <button class="btn" onclick="yon('right')">➡️</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const kontrolDiv = document.getElementById('kontroller');
+    const secimDiv = document.getElementById('secim');
+
+    let x = 180, y = 180, size = 20;
+    let dx = 0, dy = 0;
+    let blocks = [];
+
+    for (let i = 0; i < 100; i++) {
+      blocks.push({
+        x: Math.floor(Math.random() * 20) * size,
+        y: Math.floor(Math.random() * 20) * size,
+      });
+    }
+
+    function draw() {
+      ctx.fillStyle = '#333';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = 'yellow';
+      for (let b of blocks) {
+        ctx.fillRect(b.x, b.y, size, size);
+      }
+
+      x += dx;
+      y += dy;
+
+      ctx.fillStyle = 'aqua';
+      ctx.fillRect(x, y, size, size);
+
+      let ayakta = blocks.some(b => b.x === x && b.y === y);
+
+      if (!ayakta) {
+        clearInterval(game);
+        alert('🕳️ Zeminden düştün, oyun bitti!');
+        location.reload();
+      }
+    }
+
+    function yon(tus) {
+      if (tus === 'left') { dx = -size; dy = 0; }
+      if (tus === 'right') { dx = size; dy = 0; }
+      if (tus === 'up') { dy = -size; dx = 0; }
+      if (tus === 'down') { dy = size; dx = 0; }
+    }
+
+    function baslat(tip) {
+      secimDiv.style.display = 'none';
+      if (tip === 'mobil') kontrolDiv.style.display = 'block';
+
+      window.addEventListener('keydown', e => {
+        if (tip === 'pc') {
+          if (e.key === 'ArrowLeft') yon('left');
+          if (e.key === 'ArrowRight') yon('right');
+          if (e.key === 'ArrowUp') yon('up');
+          if (e.key === 'ArrowDown') yon('down');
+        }
+      });
+
+      game = setInterval(draw, 200);
+    }
+  </script>
+
+</body>
+</html>
