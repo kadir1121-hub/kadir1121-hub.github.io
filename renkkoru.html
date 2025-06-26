@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>KadirGames - Gelişen Farklı Kutuyu Bul</title>
+<style>
+  body {
+    margin:0; padding:0;
+    font-family: Arial, sans-serif;
+    background: #222;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    user-select: none;
+  }
+  #loginScreen, #gameScreen {
+    width: 100%;
+    max-width: 600px;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  #loginScreen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+  #loginScreen input {
+    font-size: 1.5rem;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    margin-top: 15px;
+    width: 80%;
+  }
+  #loginScreen button {
+    margin-top: 20px;
+    padding: 12px 25px;
+    font-size: 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #27ae60;
+    color: white;
+    user-select: none;
+  }
+  #gameScreen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+  }
+  #score {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+  #boxContainer {
+    display: grid;
+    grid-gap: 10px;
+    justify-content: center;
+  }
+  .box {
+    cursor: pointer;
+    border-radius: 12px;
+    transition: transform 0.15s ease;
+  }
+  .box:active {
+    transform: scale(0.9);
+  }
+  #leaderboard {
+    margin-top: 30px;
+    width: 100%;
+  }
+  #leaderboard h2 {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  #leaderboard ol {
+    padding-left: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <h1>KadirGames</h1>
+  <p>İsminizi Girin (Değiştirilemez)</p>
+  <input type="text" id="usernameInput" placeholder="İsminizi yazın..." autocomplete="off" />
+  <button id="loginBtn">Başla</button>
+  <p id="loginMessage" style="color:#f44336; margin-top:15px;"></p>
+</div>
+
+<div id="gameScreen">
+  <div id="score">Puan: 0</div>
+  <div id="boxContainer"></div>
+
+  <div id="leaderboard">
+    <h2>En İyi Oyuncular</h2>
+    <ol id="scoreList"></ol>
+  </div>
+</div>
+
+<script>
+  const loginScreen = document.getElementById('loginScreen');
+  const gameScreen = document.getElementById('gameScreen');
+  const loginBtn = document.getElementById('loginBtn');
+  const usernameInput = document.getElementById('usernameInput');
+  const loginMessage = document.getElementById('loginMessage');
+  const scoreDisplay = document.getElementById('score');
+  const boxContainer = document.getElementById('boxContainer');
+  const scoreList = document.getElementById('scoreList');
+
+  const STORAGE_USER = 'kg_username';
+  const STORAGE_SCORE = 'kg_scoreboard';
+
+  let username = null;
+  let score = 0;
+
+  // Başlangıç grid boyutu
+  let gridSize = 4;  // 4x4 ile başla
+  const maxGridSize = 11;
+  const maxScore = 100;
+
+  // Temel renk (RGB)
+  const baseColor = [50, 150, 200];
+
+  // Renk farkını zorlukla küçült (başta fark büyük, zorlaştıkça küçülür)
+  function getColorDiff(score) {
+    // 15’den başlayıp 3’e kadar azalsın
+    let diff = 15 - (score * 0.12);
+    if(diff < 3) diff = 3;
+    return diff;
+  }
+
+  function rgbString(rgb) {
+    return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+  }
+
+  function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function init() {
+    const savedUser = localStorage.getItem(STORAGE_USER);
+    if(savedUser) {
+      username = savedUser;
+      showGame();
+    } else {
+      showLogin();
+    }
+  }
+
+  function showLogin() {
+    loginScreen.style.display = 'flex';
+    gameScreen.style.display = 'none';
+  }
+
+  function showGame() {
+    loginScreen.style.display = 'none';
+    gameScreen.style.display = 'flex';
+    score = 0;
+    gridSize = 4;
+    updateScore();
+    generateBoxes();
+    loadLeaderboard();
+  }
+
+  function updateScore() {
+    scoreDisplay.textContent = `Puan: ${score}`;
+  }
+
+  function generateBoxes() {
+    boxContainer.innerHTML = '';
+    boxContainer.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+
+    const totalBoxes = gridSize * gridSize;
+    const diffIndex = randInt(0, totalBoxes - 1);
+    const diff = getColorDiff(score);
+
+    for(let i = 0; i < totalBoxes; i++) {
+      const box = document.createElement('div');
+      box.classList.add('box');
+
+      // Kutunun boyutunu ayarla (kutular kare olacak ve container genişliğine göre)
+      // Burada 90% container genişliği ile kutu boyutu hesaplanacak
+      const containerWidth = boxContainer.clientWidth || 480; // fallback 480px
+      const gapTotal = (gridSize -1) * 10;
+      const boxSize = Math.floor((containerWidth - gapTotal) / gridSize);
+      box.style.width = box.style.height = boxSize + 'px';
+
+      // Base renk
+      let color = [...baseColor];
+      if(i === diffIndex) {
+        // Farklı kutu rengi - ton farkı küçük ve zor bulunacak
+        color[0] = Math.min(255, color[0] + diff);
+        color[1] = Math.min(255, color[1] + diff);
+        color[2] = Math.min(255, color[2] + diff);
+      }
+      box.style.backgroundColor = rgbString(color);
+
+      box.addEventListener('click', () => {
+        if(i === diffIndex) {
+          score++;
+          if(score > maxScore) {
+            alert('Tebrikler! Maksimum puana ulaştınız.');
+            score = 0;
+            gridSize = 4;
+          } else {
+            if(gridSize < maxGridSize && score % 5 === 0) {
+              gridSize++;
+            }
+          }
+          updateScore();
+          saveScore();
+          generateBoxes();
+        } else {
+          alert('Yanlış kutu! Oyun bitti.');
+          score = 0;
+          gridSize = 4;
+          updateScore();
+          generateBoxes();
+        }
+      });
+      boxContainer.appendChild(box);
+    }
+  }
+
+  function saveScore() {
+    let scoreboard = JSON.parse(localStorage.getItem(STORAGE_SCORE)) || [];
+    const existingIndex = scoreboard.findIndex(s => s.username === username);
+    if(existingIndex >= 0) {
+      if(score > scoreboard[existingIndex].score) {
+        scoreboard[existingIndex].score = score;
+      }
+    } else {
+      scoreboard.push({username, score});
+    }
+    scoreboard.sort((a,b) => b.score - a.score);
+    scoreboard = scoreboard.slice(0, 10);
+    localStorage.setItem(STORAGE_SCORE, JSON.stringify(scoreboard));
+    loadLeaderboard();
+  }
+
+  function loadLeaderboard() {
+    const scoreboard = JSON.parse(localStorage.getItem(STORAGE_SCORE)) || [];
+    scoreList.innerHTML = '';
+    for(const s of scoreboard) {
+      const li = document.createElement('li');
+      li.textContent = `${s.username}: ${s.score}`;
+      scoreList.appendChild(li);
+    }
+  }
+
+  loginBtn.addEventListener('click', () => {
+    const name = usernameInput.value.trim();
+    if(!name) {
+      loginMessage.textContent = 'Lütfen geçerli bir isim girin.';
+      return;
+    }
+    const savedUser = localStorage.getItem(STORAGE_USER);
+    if(savedUser && savedUser !== name) {
+      loginMessage.textContent = `Bu cihazda sadece "${savedUser}" ismi kullanılabilir.`;
+      return;
+    }
+    username = name;
+    localStorage.setItem(STORAGE_USER, username);
+    loginMessage.textContent = '';
+    showGame();
+  });
+
+  window.onload = init;
+</script>
+
+</body>
+</html>
