@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>kadirgames - Oyun Sitesi</title>
+  <style>
+    body { margin: 0; font-family: sans-serif; background: #4caf50; }
+    header { background: #1b5e20; color: white; padding: 20px; font-size: 32px; text-align: center; }
+    .oyunlar { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; padding: 20px; }
+    .oyun { background: white; padding: 10px; border-radius: 10px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.3); cursor: pointer; }
+    .oyun:hover { transform: scale(1.05); transition: .2s; }
+    .oyun img { width: 100%; border-radius: 8px; }
+    iframe { width: 100%; height: 400px; display: none; border: none; }
+  </style>
+</head>
+<body>
+  <header>🎮 kadirgames - En Güzel Oyunlar</header>
+
+  <div class="oyunlar">
+    <div class="oyun" onclick="oyunAc('yilan.html')">
+      <img src="https://via.placeholder.com/200x150?text=Yılan+Oyunu">
+      <h3>Yılan Oyunu</h3>
+    </div>
+    <div class="oyun" onclick="oyunAc('kutu.html')">
+      <img src="https://via.placeholder.com/200x150?text=Zeminde+Kal">
+      <h3>Zeminde Kal</h3>
+    </div>
+  </div>
+
+  <iframe id="oyunFrame"></iframe>
+
+  <script>
+    function oyunAc(dosya) {
+      const frame = document.getElementById('oyunFrame');
+      frame.src = dosya;
+      frame.style.display = 'block';
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>

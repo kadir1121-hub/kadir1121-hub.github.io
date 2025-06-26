@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kutu Oyunu</title>
+<style>
+  body {
+    margin: 0;
+    background: #3498db;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+  #gameArea {
+    position: relative;
+    width: 400px;
+    height: 400px;
+    background: #2980b9;
+    border: 3px solid #1c5980;
+    overflow: hidden;
+    display: none; /* Başlangıçta gizli */
+  }
+  #player {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background-image: url('https://i.imgur.com/Xe39pQW.png'); /* Adam resmi */
+    background-size: cover;
+    bottom: 0;
+    left: 180px;
+  }
+  #ground {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 40px;
+    background-color: #27ae60;
+  }
+  #playButton {
+    background: #e74c3c;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    padding: 20px 40px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<button id="playButton">PLAY</button>
+
+<div id="gameArea">
+  <div id="player"></div>
+  <div id="ground"></div>
+</div>
+
+<script>
+const playBtn = document.getElementById('playButton');
+const gameArea = document.getElementById('gameArea');
+const player = document.getElementById('player');
+
+let posY = 0;
+let velocityY = 0;
+const gravity = 1.2;
+const jumpPower = 20;
+let onGround = true;
+let gameLoopId = null;
+
+function gameLoop() {
+  velocityY += gravity;
+  posY += velocityY;
+
+  if(posY > 0) {
+    posY = 0;
+    velocityY = 0;
+    onGround = true;
+  }
+
+  player.style.bottom = posY + 'px';
+
+  gameLoopId = requestAnimationFrame(gameLoop);
+}
+
+function startGame() {
+  playBtn.style.display = 'none';
+  gameArea.style.display = 'block';
+  posY = 0;
+  velocityY = 0;
+  onGround = true;
+  gameLoopId = requestAnimationFrame(gameLoop);
+}
+
+document.addEventListener('keydown', function(event) {
+  if(event.code === 'Space' && onGround) {
+    velocityY = -jumpPower;
+    onGround = false;
+  }
+});
+
+playBtn.addEventListener('click', startGame);
+</script>
+
+</body>
+</html>
