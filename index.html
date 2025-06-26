@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>KadirGames - Oyun Seçimi</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin:0; padding:0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #111827;
+    color: #eee;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: #0f172a;
+    padding: 20px;
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.6);
+  }
+  #content {
+    flex: 1;
+    display: flex;
+    gap: 30px;
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  .gameBox {
+    flex: 1;
+    background: #1e293b;
+    border-radius: 15px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 25px;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+  }
+  .gameBox:hover {
+    transform: scale(1.05);
+  }
+  .gameBox img {
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.7);
+    margin-bottom: 20px;
+    object-fit: cover;
+  }
+  .gameBox h2 {
+    font-size: 2rem;
+    margin: 0 0 15px 0;
+    color: #facc15; /* amber-400 */
+  }
+  .gameBox button {
+    background: #2563eb; /* blue-600 */
+    border: none;
+    padding: 12px 28px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    font-size: 1.2rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.25s ease;
+  }
+  .gameBox button:hover {
+    background: #1d4ed8; /* blue-700 */
+  }
+
+  #usernameModal {
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  #usernameModalContent {
+    background: #1e293b;
+    padding: 30px 40px;
+    border-radius: 15px;
+    text-align: center;
+    max-width: 350px;
+    width: 90%;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+  }
+  #usernameModalContent h2 {
+    margin-bottom: 15px;
+    font-weight: 700;
+    color: #facc15;
+  }
+  #usernameInput {
+    width: 100%;
+    font-size: 1.4rem;
+    padding: 12px 15px;
+    border-radius: 10px;
+    border: none;
+    margin-bottom: 20px;
+  }
+  #usernameSubmit {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  #usernameSubmit:hover {
+    background: #1d4ed8;
+  }
+  #usernameError {
+    color: #f87171;
+    margin-top: 10px;
+    min-height: 1.2em;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    #content {
+      flex-direction: column;
+      margin: 20px;
+    }
+    .gameBox {
+      max-width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>KadirGames</header>
+
+<div id="content">
+  <div class="gameBox" id="snakeGame">
+    <img src="https://i.imgur.com/TlzRK3U.png" alt="Yılan Oyunu" />
+    <h2>Yılan Oyunu</h2>
+    <button>Oyna</button>
+  </div>
+
+  <div class="gameBox" id="colorBlindGame">
+    <img src="https://i.imgur.com/2ny8Bv8.png" alt="Renk Körü Oyunu" />
+    <h2>Renk Körü</h2>
+    <button>Oyna</button>
+  </div>
+</div>
+
+<!-- Kullanıcı ismi soran modal -->
+<div id="usernameModal" style="display:none;">
+  <div id="usernameModalContent">
+    <h2>İsminizi Girin</h2>
+    <input type="text" id="usernameInput" placeholder="İsminizi yazın..." autocomplete="off" />
+    <button id="usernameSubmit">Başla</button>
+    <div id="usernameError"></div>
+  </div>
+</div>
+
+<script>
+  // Basit IP alma (Bu sadece örnek, gerçek IP alma için backend gerekir)
+  // Biz lokalStorage ile cihaz bazlı isim tutacağız.
+  // İp bazlı değil, cihaz bazlı (Çünkü tarayıcıda IP almak güvenli değil).
+
+  const USERNAME_KEY = 'kadirgames_username';
+
+  const usernameModal = document.getElementById('usernameModal');
+  const usernameInput = document.getElementById('usernameInput');
+  const usernameSubmit = document.getElementById('usernameSubmit');
+  const usernameError = document.getElementById('usernameError');
+
+  // Oyun kutuları
+  const snakeGameBox = document.getElementById('snakeGame');
+  const colorBlindGameBox = document.getElementById('colorBlindGame');
+
+  function showUsernameModal() {
+    usernameModal.style.display = 'flex';
+  }
+
+  function hideUsernameModal() {
+    usernameModal.style.display = 'none';
+  }
+
+  function saveUsername(name) {
+    localStorage.setItem(USERNAME_KEY, name);
+  }
+
+  function getUsername() {
+    return localStorage.getItem(USERNAME_KEY);
+  }
+
+  function redirectToGame(game) {
+    // Burada oyun sayfası yolunu yaz
+    // Örnek:
+    if(game === 'snake') {
+      window.location.href = 'yilan.html';
+    } else if(game === 'colorBlind') {
+      window.location.href = 'renkkoru.html'; // senin renk körü dosya adı
+    }
+  }
+
+  function validateName(name) {
+    return name.length >= 3 && name.length <= 15 && /^[a-zA-Z0-9ğüşöçıİĞÜŞÖÇ]+$/.test(name);
+  }
+
+  function init() {
+    const savedName = getUsername();
+    if(!savedName) {
+      showUsernameModal();
+    }
+  }
+
+  usernameSubmit.addEventListener('click', () => {
+    const name = usernameInput.value.trim();
+    if(!validateName(name)) {
+      usernameError.textContent = "Geçerli bir isim girin (3-15 karakter, harf veya rakam).";
+      return;
+    }
+    saveUsername(name);
+    hideUsernameModal();
+  });
+
+  snakeGameBox.querySelector('button').addEventListener('click', () => {
+    const user = getUsername();
+    if(!user) {
+      showUsernameModal();
+      return;
+    }
+    redirectToGame('snake');
+  });
+
+  colorBlindGameBox.querySelector('button').addEventListener('click', () => {
+    const user = getUsername();
+    if(!user) {
+      showUsernameModal();
+      return;
+    }
+    redirectToGame('colorBlind');
+  });
+
+  window.onload = init;
+</script>
+
+</body>
+</html>
