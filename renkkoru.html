@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>RenkKörü Oyunu</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      background: #f2f2f2;
+    }
+    #game {
+      margin: 20px auto;
+      display: grid;
+      gap: 5px;
+      width: fit-content;
+    }
+    .box {
+      width: 60px;
+      height: 60px;
+      cursor: pointer;
+    }
+    #info {
+      margin-top: 10px;
+      font-size: 20px;
+    }
+    #scoreboard {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>RenkKörü</h1>
+  <div id="info">Süre: <span id="time">60</span> sn | Puan: <span id="score">0</span></div>
+  <div id="game"></div>
+  <div id="scoreboard" style="display:none">
+    <h2>Oyun Bitti!</h2>
+    <p>Puanınız: <span id="finalScore"></span></p>
+    <h3>Sıralama:</h3>
+    <ol id="ranking"></ol>
+  </div>
+
+  <script>
+    const game = document.getElementById("game");
+    const scoreSpan = document.getElementById("score");
+    const timeSpan = document.getElementById("time");
+    const finalScore = document.getElementById("finalScore");
+    const scoreboard = document.getElementById("scoreboard");
+    const rankingList = document.getElementById("ranking");
+
+    let gridSize = 4;
+    let score = 0;
+    let timeLeft = 60;
+    let playerName = localStorage.getItem("playerName") || prompt("İsmin nedir?");
+
+    if (!localStorage.getItem("playerName")) {
+      localStorage.setItem("playerName", playerName);
+    }
+
+    function getColor() {
+      const base = Math.floor(Math.random() * 200);
+      return `rgb(${base}, ${base + 10}, ${base})`;
+    }
+
+    function createGrid() {
+      game.innerHTML = "";
+      game.style.gridTemplateColumns = `repeat(${gridSize}, auto)`;
+
+      const baseColor = getColor();
+      const diffColor = baseColor.replace(/(\d+)/, match => parseInt(match) + 20);
+      const total = gridSize * gridSize;
+      const diffIndex = Math.floor(Math.random() * total);
+
+      for (let i = 0; i < total; i++) {
+        const box = document.createElement("div");
+        box.className = "box";
+        box.style.background = i === diffIndex ? diffColor : baseColor;
+        if (i === diffIndex) {
+          box.style.outline = "2px solid white";
+          box.addEventListener("click", () => {
+            score++;
+            scoreSpan.textContent = score;
+            gridSize = Math.min(gridSize + 1, 10);
+            createGrid();
+          });
+        } else {
+          box.addEventListener("click", () => {
+            createGrid(); // yanlışsa puan artmaz ama oyun devam eder
+          });
+        }
+        game.appendChild(box);
+      }
+    }
+
+    function endGame() {
+      game.style.display = "none";
+      document.getElementById("info").style.display = "none";
+      scoreboard.style.display = "block";
+      finalScore.textContent = score;
+
+      let scores = JSON.parse(localStorage.getItem("scores")) || [];
+      scores.push({ name: playerName, score });
+      scores.sort((a, b) => b.score - a.score);
+      scores = scores.slice(0, 10);
+      localStorage.setItem("scores", JSON.stringify(scores));
+
+      rankingList.innerHTML = "";
+      scores.forEach(entry => {
+        const li = document.createElement("li");
+        li.textContent = `${entry.name}: ${entry.score}`;
+        rankingList.appendChild(li);
+      });
+    }
+
+    createGrid();
+
+    const timer = setInterval(() => {
+      timeLeft--;
+      timeSpan.textContent = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        endGame();
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
