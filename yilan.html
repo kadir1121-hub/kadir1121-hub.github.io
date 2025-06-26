@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Yılan Oyunu - Kral Versiyon</title>
+<style>
+  body {
+    margin: 0; background: linear-gradient(135deg, #2ecc71, #27ae60);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;
+    user-select: none;
+  }
+  #gameCanvas {
+    background: #145214;
+    border-radius: 15px;
+    box-shadow: 0 0 20px #27ae60;
+    display: none;
+  }
+  #playButton {
+    background: #e74c3c;
+    border: none;
+    color: white;
+    font-size: 2.5rem;
+    padding: 18px 60px;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    box-shadow: 0 0 15px #c0392b;
+  }
+  #score {
+    color: white;
+    font-size: 24px;
+    margin-bottom: 15px;
+    display: none;
+    text-shadow: 1px 1px 4px #000;
+  }
+  /* Dokunmatik ok tuşları */
+  #controls {
+    display: none;
+    user-select: none;
+  }
+  .btn {
+    width: 70px;
+    height: 70px;
+    margin: 6px;
+    font-size: 2.5rem;
+    font-weight: 900;
+    border-radius: 14px;
+    border: none;
+    background: #e74c3c;
+    color: white;
+    box-shadow: 0 0 15px #c0392b;
+  }
+  #upBtn { margin-left: 80px; }
+</style>
+</head>
+<body>
+
+<button id="playButton">PLAY</button>
+<div id="score">Skor: 0</div>
+<canvas id="gameCanvas" width="400" height="400"></canvas>
+
+<div id="controls">
+  <button class="btn" id="upBtn">↑</button><br>
+  <button class="btn" id="leftBtn">←</button>
+  <button class="btn" id="downBtn">↓</button>
+  <button class="btn" id="rightBtn">→</button>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const playBtn = document.getElementById('playButton');
+const scoreDiv = document.getElementById('score');
+const controls = document.getElementById('controls');
+
+const box = 20;
+let snake = [];
+let food = {};
+let d = null;
+let score = 0;
+let game = null;
+
+function initGame() {
+  snake = [{ x: 9 * box, y: 10 * box }];
+  food = randomFood();
+  d = 'RIGHT';
+  score = 0;
+  scoreDiv.textContent = 'Skor: 0';
+  scoreDiv.style.display = 'block';
+  canvas.style.display = 'block';
+  controls.style.display = 'block';
+  playBtn.style.display = 'none';
+  document.addEventListener('keydown', direction);
+  game = setInterval(draw, 100);
+}
+
+function randomFood() {
+  let newFood;
+  do {
+    newFood = {
+      x: Math.floor(Math.random() * 20) * box,
+      y: Math.floor(Math.random() * 20) * box
+    };
+  } while (snake.some(segment => segment.x === newFood.x && segment.y === newFood.y));
+  return newFood;
+}
+
+function direction(event) {
+  let key = event.key || event.keyCode;
+  if ((key === 'ArrowLeft' || key === 37) && d !== 'RIGHT') d = 'LEFT';
+  else if ((key === 'ArrowUp' || key === 38) && d !== 'DOWN') d = 'UP';
+  else if ((key === 'ArrowRight' || key === 39) && d !== 'LEFT') d = 'RIGHT';
+  else if ((key === 'ArrowDown' || key === 40) && d !== 'UP') d = 'DOWN';
+}
+
+function collision(head, array) {
+  for (let i = 1; i < array.length; i++) {
+    if (head.x === array[i].x && head.y === array[i].y) return true;
+  }
+  return false;
+}
+
+function draw() {
+  // Arkaplan
+  ctx.fillStyle = '#145214';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Yılan
+  for (let i = 0; i < snake.length; i++) {
+    ctx.fillStyle = (i === 0) ? '#e74c3c' : '#27ae60';
+    ctx.fillRect(snake[i].x, snake[i].y, box, box);
+    ctx.strokeStyle = '#145214';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(snake[i].x, snake[i].y, box, box);
+  }
+
+  // Yiyecek (elma resmi)
+  const foodImg = new Image();
+  foodImg.src = 'https://i.imgur.com/Th5rH9f.png';
+  ctx.drawImage(foodImg, food.x, food.y, box, box);
+
+  let snakeX = snake[0].x;
+  let snakeY = snake[0].y;
+
+  if (d === 'LEFT') snakeX -= box;
+  else if (d === 'UP') snakeY -= box;
+  else if (d === 'RIGHT') snakeX += box;
+  else if (d === 'DOWN') snakeY += box;
+
+  if (snakeX < 0 || snakeY < 0 || snakeX >= canvas.width || snakeY >= canvas.height || collision({ x: snakeX, y: snakeY }, snake)) {
+    clearInterval(game);
+    alert('Game Over! Skorun: ' + score);
+    resetGame();
+    return;
+  }
+
+  if (snakeX === food.x && snakeY === food.y) {
+    score++;
+    scoreDiv.textContent = 'Skor: ' + score;
+    food = randomFood();
+  } else {
+    snake.pop();
+  }
+
+  snake.unshift({ x: snakeX, y: snakeY });
+}
+
+function resetGame() {
+  playBtn.style.display = 'block';
+  canvas.style.display = 'none';
+  controls.style.display = 'none';
+  scoreDiv.style.display = 'none';
+  d = null;
+  snake = [];
+  clearInterval(game);
+}
+
+playBtn.addEventListener('click', initGame);
+
+document.getElementById('upBtn').addEventListener('click', () => { if (d !== 'DOWN') d = 'UP'; });
+document.getElementById('leftBtn').addEventListener('click', () => { if (d !== 'RIGHT') d = 'LEFT'; });
+document.getElementById('downBtn').addEventListener('click', () => { if (d !== 'UP') d = 'DOWN'; });
+document.getElementById('rightBtn').addEventListener('click', () => { if (d !== 'LEFT') d = 'RIGHT'; });
+</script>
+
+</body>
+</html>

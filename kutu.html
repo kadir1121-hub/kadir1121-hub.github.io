@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kutu Oyunu - Geri Çık Butonlu</title>
+<style>
+  body {
+    margin: 0;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    user-select: none;
+  }
+  #gameArea {
+    position: relative;
+    width: 400px;
+    height: 400px;
+    margin: 40px auto 0;
+    background: #1c5980;
+    border-radius: 20px;
+    border: 3px solid #14527a;
+    overflow: hidden;
+    box-shadow: 0 0 20px #2980b9;
+  }
+  #player {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background-image: url('https://i.imgur.com/Xe39pQW.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    bottom: 0;
+    left: 175px;
+    transition: bottom 0.1s ease;
+  }
+  #ground {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 40px;
+    background-color: #27ae60;
+    border-radius: 0 0 20px 20px;
+  }
+  #block {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background-color: #f1c40f;
+    top: 150px;
+    left: 170px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px 5px rgba(241, 196, 15, 0.7);
+    transition: box-shadow 0.3s ease;
+  }
+  #block.glow {
+    box-shadow: 0 0 35px 12px rgba(241, 196, 15, 1);
+  }
+  #playButton {
+    background: #e74c3c;
+    border: none;
+    color: white;
+    font-size: 2.5rem;
+    padding: 18px 60px;
+    border-radius: 12px;
+    cursor: pointer;
+    margin: 100px auto 0;
+    display: block;
+    box-shadow: 0 0 15px #c0392b;
+    user-select: none;
+  }
+  #backButton {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: #c0392b;
+    border: none;
+    color: white;
+    padding: 10px 18px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 0 10px #a93226;
+    user-select: none;
+    display: none;
+    z-index: 1000;
+  }
+</style>
+</head>
+<body>
+
+<button id="playButton">PLAY</button>
+
+<div id="gameArea" style="display:none;">
+  <button id="backButton" title="Menüye Dön">← Geri</button>
+  <div id="player"></div>
+  <div id="ground"></div>
+  <div id="block"></div>
+</div>
+
+<script>
+const playBtn = document.getElementById('playButton');
+const gameArea = document.getElementById('gameArea');
+const player = document.getElementById('player');
+const block = document.getElementById('block');
+const backBtn = document.getElementById('backButton');
+
+let posY = 0;
+let velocityY = 0;
+const gravity = 1.3;
+const jumpPower = 22;
+let onGround = true;
+let blockHealth = 3;
+let glowing = false;
+let glowTimeout = null;
+let gameRunning = false;
+
+function gameLoop() {
+  velocityY += gravity;
+  posY += velocityY;
+
+  if(posY > 0) {
+    posY = 0;
+    velocityY = 0;
+    onGround = true;
+  }
+
+  player.style.bottom = posY + 'px';
+
+  if(gameRunning) requestAnimationFrame(gameLoop);
+}
+
+function startGlow() {
+  if(glowing) return;
+  glowing = true;
+  block.classList.add('glow');
+  glowTimeout = setTimeout(() => {
+    block.classList.remove('glow');
+    glowing = false;
+  }, 700);
+}
+
+function hitBlock() {
+  if(!gameRunning) return;
+  startGlow();
+  blockHealth--;
+  if(blockHealth <= 0) {
+    alert('Tebrikler! Blok kırıldı!');
+    resetGame();
+  }
+}
+
+function startGame() {
+  playBtn.style.display = 'none';
+  gameArea.style.display = 'block';
+  backBtn.style.display = 'block';
+  posY = 0;
+  velocityY = 0;
+  onGround = true;
+  blockHealth = 3;
+  gameRunning = true;
+  block.style.visibility = 'visible';
+  requestAnimationFrame(gameLoop);
+}
+
+function resetGame() {
+  playBtn.style.display = 'block';
+  gameArea.style.display = 'none';
+  backBtn.style.display = 'none';
+  gameRunning = false;
+  clearTimeout(glowTimeout);
+  block.classList.remove('glow');
+}
+
+document.addEventListener('keydown', function(event) {
+  if(!gameRunning) return;
+  if(event.code === 'Space' || event.key === ' ') {
+    if(onGround) {
+      velocityY = -jumpPower;
+      onGround = false;
+    } else {
+      hitBlock();
+    }
+  }
+});
+
+backBtn.addEventListener('click', resetGame);
+playBtn.addEventListener('click', startGame);
+</script>
+
+</body>
+</html>
