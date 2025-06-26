@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kutu Oyunu</title>
+<style>
+  body {
+    background: #3498db;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+  #gameArea {
+    position: relative;
+    width: 400px;
+    height: 400px;
+    background: #2980b9;
+    border: 3px solid #1c5980;
+    overflow: hidden;
+  }
+  #player {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background-image: url('https://i.imgur.com/Xe39pQW.png'); /* basit kutu karakter resmi */
+    background-size: cover;
+    bottom: 0;
+    left: 180px;
+  }
+  #ground {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 40px;
+    background-color: #27ae60;
+  }
+</style>
+</head>
+<body>
+<div id="gameArea">
+  <div id="player"></div>
+  <div id="ground"></div>
+</div>
+
+<script>
+  const player = document.getElementById('player');
+  const gameArea = document.getElementById('gameArea');
+  const groundHeight = 40;
+
+  let posX = 180;  // yatay pozisyon
+  let posY = 0;    // düşey pozisyon (0 en üst, +y aşağı doğru)
+  let velocityY = 0;
+  const gravity = 1.2;
+  const jumpPower = 20;
+  let onGround = true;
+
+  document.addEventListener('keydown', function(event) {
+    if(event.code === 'Space' && onGround) {
+      velocityY = -jumpPower;
+      onGround = false;
+    }
+  });
+
+  function gameLoop() {
+    velocityY += gravity;
+    posY += velocityY;
+
+    if(posY > 0) {
+      posY = 0;
+      velocityY = 0;
+      onGround = true;
+    }
+
+    player.style.bottom = posY + 'px';
+    player.style.left = posX + 'px';
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  gameLoop();
+</script>
+</body>
+</html>
